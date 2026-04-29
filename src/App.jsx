@@ -379,14 +379,6 @@ export default function App() {
       </div>
 
       <header className="topbar">
-        <div className="topbar-meta">
-          <p className="brand-copy">{getText(survey.meta.title, language)}</p>
-          <div className="progress-summary">
-            <span className="progress-label">{progressLabel}</span>
-            <span className="progress-count">{progressCount}</span>
-          </div>
-        </div>
-
         <label className="language-switcher" htmlFor="language-select">
           <span>{getText(survey.ui.languageLabel, language)}</span>
           <select
@@ -485,7 +477,9 @@ export default function App() {
                 disabled={!canMoveUp}
                 aria-label={getText(survey.ui.previous, language)}
               >
-                <span className="nav-chevron nav-chevron-up">&gt;</span>
+                <svg className="nav-chevron-svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path fill="currentColor" d="M6.737 4.612a2 2 0 0 1 2.677.138l5.543 5.543.068.076a1 1 0 0 1-1.406 1.406l-.076-.068L8 6.164l-5.543 5.543a1 1 0 1 1-1.414-1.414L6.586 4.75z"></path>
+                </svg>
               </button>
               <button
                 type="button"
@@ -506,7 +500,9 @@ export default function App() {
                 disabled={!canMoveDown}
                 aria-label={activeView.type === "intro" ? getText(survey.ui.continue, language) : getText(survey.ui.next, language)}
               >
-                <span className="nav-chevron nav-chevron-down">&gt;</span>
+                <svg className="nav-chevron-svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path fill="currentColor" d="M6.737 11.388a2 2 0 0 0 2.677-.138l5.543-5.543.068-.076a1 1 0 0 0-1.406-1.406l-.076.068L8 9.836 2.457 4.293a1 1 0 1 0-1.414 1.414l5.543 5.543z"></path>
+                </svg>
               </button>
             </div>
           ) : null}
@@ -569,10 +565,10 @@ function renderView(view, props) {
               {view.required ? <span className="required-mark">*</span> : null}
             </h2>
           </div>
-          {view.description ? <p className="step-description">{view.description}</p> : null}
         </div>
 
         <div className="field-stack">
+          {view.description ? <p className="field-stack-description">{view.description}</p> : null}
           {view.step.fields.map((field) => (
             <FieldRenderer
               key={field.id}
@@ -759,6 +755,7 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
 
   if (field.type === "scaleGroup") {
     const hasScaleError = field.items.some((item) => errors[item.id]);
+    const groupError = hasScaleError ? errors[field.items.find((item) => errors[item.id])?.id] : "";
 
     return (
       <div className={`field-card scale-group${hasScaleError ? " error-field" : ""}`}>
@@ -803,10 +800,10 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
                   </label>
                 ))}
               </div>
-              {errors[item.id] ? <p className="error-text">{errors[item.id]}</p> : null}
             </div>
           ))}
         </div>
+        {groupError ? <p className="error-text scale-group-error">{groupError}</p> : null}
       </div>
     );
   }
@@ -865,7 +862,9 @@ function SelectField({ field, language, answers, survey, stepTitle, onFieldChang
           {selectedOption ? getText(selectedOption.label, language) : getText(survey.ui.selectPlaceholder, language)}
         </span>
         <span className={`select-trigger-chevron${isOpen ? " is-open" : ""}`} aria-hidden="true">
-          &gt;
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6.737 11.388a2 2 0 0 0 2.677-.138l5.543-5.543.068-.076a1 1 0 0 0-1.406-1.406l-.076.068L8 9.836 2.457 4.293a1 1 0 1 0-1.414 1.414l5.543 5.543z"></path>
+          </svg>
         </span>
       </button>
 

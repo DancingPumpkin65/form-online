@@ -1,151 +1,294 @@
-# ENCG Business English Survey App
+# ENCG Business English Survey
 
-React multilingual survey app for the academic questionnaire **“A Needs Analysis of Business English ESP at ENCG.”**
+Online multilingual survey for **“A Needs Analysis of Business English ESP at ENCG.”**
 
-## Project structure
+**Live website:**
 
 ```text
-form-online/
-├─ index.html
-├─ package.json
-├─ vite.config.js
-├─ backend/
-│  └─ Code.gs
-├─ questionnaire.js
-├─ src/
-│  ├─ App.jsx
-│  └─ main.jsx
-├─ styles.css
-└─ README.md
+https://dancingpumpkin65.github.io/form-online/
 ```
 
-## What is included
+---
 
-- React frontend powered by Vite
-- Bun development workflow with `bun dev`
-- English/French language switcher with answer preservation
-- One-step survey flow with previous/next navigation
-- Conditional logic for pathway and internship questions
-- Autosaved local draft until submission
-- Duplicate-submission protection in the browser and in Google Apps Script
-- Google Apps Script backend that appends responses to Google Sheets
+## Features
 
-## Where to customize content
+- React + Vite frontend
+- English / French language switch
+- Answers stay saved when switching language
+- Previous / Next navigation
+- Conditional questions
+- Auto-save draft in browser
+- Prevents duplicate submissions
+- Stores responses directly in Google Sheets
 
-Edit `questionnaire.js`.
+---
 
-- Survey text, sections, options, and branching logic are defined there.
-- The Google Apps Script endpoint URL is also set there:
+# Project Structure
 
-```js
+```bash
+form-online/
+│
+├── backend/
+│   └── Code.gs
+│
+├── src/
+│   ├── App.jsx
+│   └── main.jsx
+│
+├── questionnaire.js
+├── styles.css
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+# How It Works
+
+## Frontend
+
+Users complete the survey here:
+
+```text
+https://dancingpumpkin65.github.io/form-online/
+```
+
+Frontend handles:
+
+- Showing questions
+- Validation
+- Saving progress locally
+- Sending responses to Google Apps Script
+
+---
+
+## Backend
+
+Google Apps Script receives responses and stores them in Google Sheets.
+
+Backend file:
+
+```bash
+backend/Code.gs
+```
+
+---
+
+# Important Configuration
+
+## Update `questionnaire.js`
+
+Replace this placeholder:
+
+```javascript
 endpointUrl: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"
 ```
 
-Replace that placeholder with your deployed Apps Script `/exec` URL.
+With your real deployed Apps Script URL:
 
-## Local development with Bun
+```javascript
+endpointUrl: "https://script.google.com/macros/s/your-script-id/exec"
+```
 
-1. Install dependencies:
+---
+
+# `Code.gs` Variables Explained
+
+```javascript
+const RESPONSES_SHEET_NAME = "YOUR_RESPONSES_SHEET_NAME";
+const GOOGLE_SHEET_ID = "YOUR_GOOGLE_SHEET_ID";
+```
+
+---
+
+## `RESPONSES_SHEET_NAME`
+
+This is the name of the tab inside your Google Sheet where responses will be stored.
+
+Default:
+
+```javascript
+const RESPONSES_SHEET_NAME = "Sheet1";
+```
+
+If your tab is named `Responses`, change it to:
+
+```javascript
+const RESPONSES_SHEET_NAME = "Responses";
+```
+
+---
+
+## `GOOGLE_SHEET_ID`
+
+This tells Google Apps Script which spreadsheet to use.
+
+Example Google Sheet URL:
+
+```text
+https://docs.google.com/spreadsheets/d/1abcXYZ123456789/edit#gid=0
+```
+
+Copy only this part:
+
+```text
+1abcXYZ123456789
+```
+
+Then update your code:
+
+```javascript
+const GOOGLE_SHEET_ID = "1abcXYZ123456789";
+```
+
+---
+
+# Local Development
+
+Install dependencies:
 
 ```bash
 bun install
 ```
 
-2. Start the dev server:
+Run development server:
 
 ```bash
 bun dev
 ```
 
-3. Open the local URL shown by Vite.
+Open the local URL shown in terminal.
 
-To clear the saved draft/submitted state during testing, open the dev URL with `?reset=1`.
+---
 
-## Frontend deployment on GitHub Pages
+# Deploy Frontend (GitHub Pages)
 
-1. Run a production build:
+Build production version:
 
 ```bash
 bun run build
 ```
 
-2. Deploy the generated `dist/` folder to GitHub Pages.
-3. If you use GitHub Actions for Pages, publish the `dist/` output artifact.
+Deploy the generated `dist/` folder to :contentReference[oaicite:0]{index=0}.
 
-## Backend deployment on Google Apps Script
+Live site:
 
-### 1. Create the spreadsheet
-
-1. Create a new Google Sheet.
-2. Rename the first sheet to `Responses`, or leave it as-is; the script will create `Responses` automatically if needed.
-
-### 2. Add the Apps Script code
-
-1. In the Google Sheet, open `Extensions` -> `Apps Script`.
-2. Delete any starter code in the editor.
-3. Paste the contents of `backend/Code.gs`.
-4. Save the project.
-
-### 3. Deploy as a web app
-
-1. Click `Deploy` -> `New deployment`.
-2. Choose type: `Web app`.
-3. Description: `Survey receiver`.
-4. `Execute as`: `Me`.
-5. `Who has access`: `Anyone`.
-6. Click `Deploy`.
-7. Authorize the script when Google prompts you.
-8. Copy the generated Web app URL ending in `/exec`.
-
-### 4. Connect the frontend
-
-1. Open `questionnaire.js`.
-2. Replace:
-
-```js
-endpointUrl: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"
+```text
+https://dancingpumpkin65.github.io/form-online/
 ```
 
-with your actual Apps Script URL.
+---
 
-3. Commit and push the updated file to GitHub.
+# Deploy Backend (Google Apps Script)
 
-## How data is stored
+## Step 1: Create Google Sheet
 
-Each submission sends:
+Create a new spreadsheet.
 
-- Server timestamp
-- Survey id
-- Survey version
-- Submission id
+Example name:
+
+```text
+Survey Responses
+```
+
+---
+
+## Step 2: Open Apps Script
+
+Inside :contentReference[oaicite:1]{index=1}:
+
+```text
+Extensions → Apps Script
+```
+
+---
+
+## Step 3: Paste Backend Code
+
+Copy:
+
+```bash
+backend/Code.gs
+```
+
+Paste it into :contentReference[oaicite:2]{index=2} editor.
+
+Save the project.
+
+---
+
+## Step 4: Deploy Script
+
+Go to:
+
+```text
+Deploy → New Deployment
+```
+
+Choose:
+
+```text
+Type: Web App
+Execute as: Me
+Who has access: Anyone
+```
+
+Deploy and copy your generated `/exec` URL.
+
+---
+
+## Step 5: Connect Frontend
+
+Paste your deployed URL inside:
+
+```javascript
+questionnaire.js
+```
+
+Example:
+
+```javascript
+endpointUrl: "https://script.google.com/macros/s/your-script-id/exec"
+```
+
+---
+
+# Stored Data
+
+Each submission stores:
+
+- Submission ID
 - Language
-- Client submission timestamp
-- One column per question
+- Timestamp
+- Question responses
 
-The Apps Script creates headers automatically on first submission and appends one row per response.
+Each question becomes a separate column in Google Sheets.
 
-## Duplicate-submission protection
+---
 
-1. Frontend:
-   - After a successful submission, the browser stores a local submitted flag and blocks another send from the same device/browser.
-2. Backend:
-   - Each submission includes a generated `submissionId`.
-   - Apps Script checks whether that `submissionId` already exists in the sheet before appending a new row.
+# Duplicate Protection
 
-## Error handling behavior
+## Frontend
 
-- The form shows a loading state while submitting.
-- Required fields are validated before the user can continue.
-- If submission fails, the answers remain in local storage so the respondent can retry.
-- If the endpoint URL is still a placeholder, the app shows a configuration error in production.
-- For local preview only, an empty endpoint uses a mock success response so you can test the UI flow without deploying Apps Script yet.
+Prevents multiple submissions from the same browser.
 
-## Local preview
+## Backend
 
-Because the app now uses Vite + React, use `bun dev` for local work instead of a plain static file server.
+Checks if `submissionId` already exists before saving.
 
-## Notes
+---
 
-- The production frontend output is still static and can be hosted on GitHub Pages after `bun run build`.
-- The backend requires a Google account because it uses Google Sheets and Apps Script.
-- If you edit question ids after collecting data, new columns may be created in the sheet. Keep ids stable once the survey is live.
+# Testing Reset
+
+Clear saved form data during testing:
+
+```text
+?reset=1
+```
+
+Example:
+
+```text
+http://localhost:5173/?reset=1
+```
