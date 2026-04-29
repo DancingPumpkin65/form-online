@@ -880,12 +880,22 @@ async function sendSubmission(endpointUrl, payload) {
     return { success: true, timestamp: new Date().toISOString(), mock: true };
   }
 
+  const useNoCors = isGoogleAppsScriptEndpoint(endpointUrl);
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload),
-    redirect: "follow"
+    redirect: "follow",
+    mode: useNoCors ? "no-cors" : "cors"
   });
+
+  if (useNoCors) {
+    return {
+      success: true,
+      timestamp: new Date().toISOString(),
+      opaque: true
+    };
+  }
 
   const text = await response.text();
   let data = {};
@@ -901,6 +911,15 @@ async function sendSubmission(endpointUrl, payload) {
   }
 
   return data;
+}
+
+function isGoogleAppsScriptEndpoint(endpointUrl) {
+  try {
+    const url = new URL(endpointUrl);
+    return url.hostname === "script.google.com" || url.hostname.endsWith(".googleusercontent.com");
+  } catch (error) {
+    return false;
+  }
 }
 
 function normalizeSavedItemId(value) {
