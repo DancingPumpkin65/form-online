@@ -1,4 +1,4 @@
-const RESPONSES_SHEET_NAME = "Responses";
+const RESPONSES_SHEET_NAME = "Sheet1";
 
 function doPost(e) {
   try {
