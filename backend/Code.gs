@@ -1,4 +1,5 @@
 const RESPONSES_SHEET_NAME = "Sheet1";
+const GOOGLE_SHEET_ID = "YOUR_GOOGLE_SHEET_ID";
 
 function doPost(e) {
   try {
@@ -48,7 +49,7 @@ function doPost(e) {
 }
 
 function getResponsesSheet_() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const spreadsheet = SpreadsheetApp.openById(GOOGLE_SHEET_ID);
   let sheet = spreadsheet.getSheetByName(RESPONSES_SHEET_NAME);
 
   if (!sheet) {

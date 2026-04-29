@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const INTRO_SECTION_IDS = new Set(["A", "B", "C", "D", "E", "F", "G"]);
 const TRANSITION_MS = 420;
+const AUTO_ADVANCE_DELAY = 180;
 
 export default function App() {
   const survey = window.SURVEY_DEFINITION;
@@ -36,9 +37,14 @@ export default function App() {
   const formRef = useRef(null);
   const fromScreenRef = useRef(null);
   const toScreenRef = useRef(null);
+  const autoAdvanceTimeoutRef = useRef(null);
 
   const visibleSteps = useMemo(() => getVisibleSteps(survey.steps, answers), [survey.steps, answers]);
   const flowItems = useMemo(() => buildFlowItems(visibleSteps), [visibleSteps]);
+
+  useEffect(() => {
+    return () => clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
+  }, []);
 
   useEffect(() => {
     if (submittedRecord) {
@@ -75,7 +81,9 @@ export default function App() {
       return;
     }
 
-    const target = formRef.current?.querySelector("input, select, textarea, button[type='submit']");
+    const target = formRef.current?.querySelector(
+      "[data-autofocus='true'], input, button[data-select-trigger='true'], textarea, button[type='submit']"
+    );
     target?.focus({ preventScroll: true });
   }, [displayItemId, submittedRecord, transition]);
 
@@ -87,9 +95,12 @@ export default function App() {
 
       const activeElement = document.activeElement;
       const isTextarea = activeElement?.tagName === "TEXTAREA";
-      const isSelect = activeElement?.tagName === "SELECT";
 
-      if (event.key !== "Enter" || event.shiftKey || isTextarea || isSelect) {
+      if (event.key !== "Enter" || event.shiftKey || isTextarea) {
+        return;
+      }
+
+      if (activeElement?.dataset?.selectTrigger === "true") {
         return;
       }
 
@@ -178,6 +189,8 @@ export default function App() {
       return;
     }
 
+    clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
+
     const currentIndex = flowItems.findIndex((item) => item.id === displayItemId);
     const nextIndex = currentIndex + direction;
 
@@ -195,6 +208,8 @@ export default function App() {
     if (transition) {
       return;
     }
+
+    clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
 
     const currentItem = getCurrentFlowItem(flowItems, displayItemId);
 
@@ -223,6 +238,8 @@ export default function App() {
   }
 
   async function transitionTo(nextItemId, direction) {
+    clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
+
     if (prefersReducedMotion()) {
       setDisplayItemId(nextItemId);
       window.scrollTo({ top: 0, behavior: "auto" });
@@ -256,12 +273,50 @@ export default function App() {
     input?.focus({ preventScroll: false });
   }
 
+  async function requestAutoAdvance(step, field, nextValue) {
+    if (transition || submitting || submittedRecord) {
+      return;
+    }
+
+    if (!shouldAutoAdvanceField(step, field, nextValue)) {
+      return;
+    }
+
+    clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
+
+    autoAdvanceTimeoutRef.current = window.setTimeout(async () => {
+      autoAdvanceTimeoutRef.current = null;
+
+      const currentItem = getCurrentFlowItem(flowItems, displayItemId);
+
+      if (!currentItem || currentItem.type !== "step" || currentItem.step.id !== step.id) {
+        return;
+      }
+
+      const predictedAnswers = { ...answers, [field.id]: nextValue };
+      const nextErrors = validateStep(step, predictedAnswers, survey, language);
+
+      if (Object.keys(nextErrors).length > 0) {
+        return;
+      }
+
+      if (currentItem.id === flowItems[flowItems.length - 1]?.id) {
+        await handleSubmit();
+        return;
+      }
+
+      await moveFlowItem(1);
+    }, AUTO_ADVANCE_DELAY);
+  }
+
   async function handleSubmit(event) {
     event?.preventDefault();
 
     if (transition || submitting || submittedRecord) {
       return;
     }
+
+    clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
 
     const allErrors = {};
     visibleSteps.forEach((step) => Object.assign(allErrors, validateStep(step, answers, survey, language)));
@@ -313,6 +368,9 @@ export default function App() {
       setSubmitting(false);
     }
   }
+
+  const canMoveDown = !submittedRecord && !submitting && !transition;
+  const canMoveUp = canMoveDown && Boolean(activeView?.canGoBack);
 
   return (
     <div className="page-shell">
@@ -370,6 +428,7 @@ export default function App() {
                     submitting,
                     survey,
                     onFieldChange,
+                    onAutoAdvance: requestAutoAdvance,
                     onNavigateBack: () => moveFlowItem(-1),
                     onNavigateNext: () => advanceFlow(),
                     onRestart: () => window.scrollTo({ top: 0, behavior: "smooth" }),
@@ -390,6 +449,7 @@ export default function App() {
                     submitting,
                     survey,
                     onFieldChange,
+                    onAutoAdvance: requestAutoAdvance,
                     onNavigateBack: () => moveFlowItem(-1),
                     onNavigateNext: () => advanceFlow(),
                     onRestart: () => window.scrollTo({ top: 0, behavior: "smooth" }),
@@ -406,6 +466,7 @@ export default function App() {
                   submitting,
                   survey,
                   onFieldChange,
+                  onAutoAdvance: requestAutoAdvance,
                   onNavigateBack: () => moveFlowItem(-1),
                   onNavigateNext: () => advanceFlow(),
                   onRestart: () => window.scrollTo({ top: 0, behavior: "smooth" }),
@@ -414,6 +475,41 @@ export default function App() {
               </div>
             )}
           </form>
+
+          {!submittedRecord ? (
+            <div className="floating-nav" aria-label="Question navigation">
+              <button
+                type="button"
+                className="floating-nav-button"
+                onClick={() => moveFlowItem(-1)}
+                disabled={!canMoveUp}
+                aria-label={getText(survey.ui.previous, language)}
+              >
+                <span className="nav-chevron nav-chevron-up">&gt;</span>
+              </button>
+              <button
+                type="button"
+                className="floating-nav-button"
+                onClick={() => {
+                  if (activeView.type === "intro") {
+                    moveFlowItem(1);
+                    return;
+                  }
+
+                  if (activeView.isLast) {
+                    handleSubmit();
+                    return;
+                  }
+
+                  advanceFlow();
+                }}
+                disabled={!canMoveDown}
+                aria-label={activeView.type === "intro" ? getText(survey.ui.continue, language) : getText(survey.ui.next, language)}
+              >
+                <span className="nav-chevron nav-chevron-down">&gt;</span>
+              </button>
+            </div>
+          ) : null}
         </section>
       </main>
     </div>
@@ -445,17 +541,14 @@ function renderView(view, props) {
 
   if (view.type === "intro") {
     return (
-      <section className="section-intro-shell step-shell forward">
+      <section className="section-intro-shell">
         <div className="section-intro-panel">
-          <p className="section-intro-kicker">"</p>
+          <span className="section-intro-kicker" aria-hidden="true">
+            "
+          </span>
           <h2 className="section-intro-title">{view.title}</h2>
           {view.copy ? <p className="section-intro-copy">{view.copy}</p> : null}
           <div className="section-intro-actions">
-            {view.canGoBack ? (
-              <button type="button" className="button button-secondary" onClick={props.onNavigateBack}>
-                {getText(props.survey.ui.previous, props.language)}
-              </button>
-            ) : null}
             <button type="button" className="button button-primary" onClick={props.onNavigateNext}>
               {getText(props.survey.ui.continue, props.language)}
             </button>
@@ -466,7 +559,7 @@ function renderView(view, props) {
   }
 
   return (
-    <div className={`step-shell ${view.motion}`}>
+    <div className="step-shell">
       <div className="step-main">
         <div className="step-header">
           <div className="step-headline">
@@ -490,6 +583,7 @@ function renderView(view, props) {
               errors={props.errors}
               survey={props.survey}
               onFieldChange={props.onFieldChange}
+              onAutoAdvance={props.onAutoAdvance}
             />
           ))}
         </div>
@@ -497,11 +591,6 @@ function renderView(view, props) {
 
       <div className="nav-row">
         <div className="button-group">
-          {view.canGoBack ? (
-            <button type="button" className="button button-secondary" onClick={props.onNavigateBack}>
-              {getText(props.survey.ui.previous, props.language)}
-            </button>
-          ) : null}
           <button
             type={view.isLast ? "submit" : "button"}
             className="button button-primary"
@@ -529,19 +618,29 @@ function renderView(view, props) {
   );
 }
 
-function FieldRenderer({ field, step, language, answers, errors, survey, onFieldChange }) {
+function FieldRenderer({ field, step, language, answers, errors, survey, onFieldChange, onAutoAdvance }) {
   const stepTitle = buildQuestionTitle(step, survey, language);
   const hasError = Boolean(errors[field.id]);
+  const otherFieldId = getOtherFieldId(field);
+  const showOtherField = otherFieldId && answers[field.id] === "other";
 
   if (field.type === "consent") {
     return (
       <div className={`field-card compact${hasError ? " error-field" : ""}`}>
+        {field.copy ? <p className="consent-support-copy">{getText(field.copy, language)}</p> : null}
         <label className="consent-toggle">
           <input
             type="checkbox"
             name={field.id}
             checked={answers[field.id] === "yes"}
-            onChange={(event) => onFieldChange(field.id, event.target.checked ? "yes" : "")}
+            onChange={(event) => {
+              const nextValue = event.target.checked ? "yes" : "";
+              onFieldChange(field.id, nextValue);
+
+              if (nextValue) {
+                onAutoAdvance(step, field, nextValue);
+              }
+            }}
           />
           <span className="consent-toggle-label">
             <span className="consent-box" aria-hidden="true" />
@@ -555,25 +654,31 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
 
   if (field.type === "select") {
     return (
-      <div className={`field-card${hasError ? " error-field" : ""}`}>
-        <select
-          className="select-input"
-          name={field.id}
-          aria-label={stepTitle}
-          required
-          value={answers[field.id] || ""}
-          onChange={(event) => onFieldChange(field.id, event.target.value)}
-        >
-          <option value="" disabled hidden>
-            {getText(survey.ui.selectPlaceholder, language)}
-          </option>
-          {field.options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {getText(option.label, language)}
-            </option>
-          ))}
-        </select>
+      <div className={`field-card${hasError || errors[otherFieldId] ? " error-field" : ""}`}>
+        <SelectField
+          field={field}
+          language={language}
+          answers={answers}
+          survey={survey}
+          stepTitle={stepTitle}
+          onFieldChange={onFieldChange}
+          onAutoAdvance={(value) => onAutoAdvance(step, field, value)}
+        />
+        {showOtherField ? (
+          <div className="other-input-wrap">
+            <input
+              type="text"
+              className="other-input"
+              name={otherFieldId}
+              data-autofocus="true"
+              value={answers[otherFieldId] || ""}
+              placeholder={getText(survey.ui.specifyOtherPlaceholder, language)}
+              onChange={(event) => onFieldChange(otherFieldId, event.target.value)}
+            />
+          </div>
+        ) : null}
         {errors[field.id] ? <p className="error-text">{errors[field.id]}</p> : null}
+        {errors[otherFieldId] ? <p className="error-text">{errors[otherFieldId]}</p> : null}
       </div>
     );
   }
@@ -582,7 +687,7 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
     const longOptions = field.options.some((option) => getText(option.label, language).length > 48);
 
     return (
-      <div className={`field-card${hasError ? " error-field" : ""}`}>
+      <div className={`field-card${hasError || errors[otherFieldId] ? " error-field" : ""}`}>
         <div
           className={`choice-grid${longOptions ? " long-options" : ""}`}
           data-count={field.options.length}
@@ -596,7 +701,15 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
                 name={field.id}
                 value={option.value}
                 checked={answers[field.id] === option.value}
-                onChange={(event) => onFieldChange(field.id, event.target.value)}
+                onChange={(event) => {
+                  onFieldChange(field.id, event.target.value);
+
+                  if (otherFieldId && event.target.value !== "other") {
+                    onFieldChange(otherFieldId, "");
+                  }
+
+                  onAutoAdvance(step, field, event.target.value);
+                }}
               />
               <span className="choice-label">
                 <span className="option-chip">{String.fromCharCode(65 + index)}</span>
@@ -605,7 +718,21 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
             </label>
           ))}
         </div>
+        {showOtherField ? (
+          <div className="other-input-wrap">
+            <input
+              type="text"
+              className="other-input"
+              name={otherFieldId}
+              data-autofocus="true"
+              value={answers[otherFieldId] || ""}
+              placeholder={getText(survey.ui.specifyOtherPlaceholder, language)}
+              onChange={(event) => onFieldChange(otherFieldId, event.target.value)}
+            />
+          </div>
+        ) : null}
         {errors[field.id] ? <p className="error-text">{errors[field.id]}</p> : null}
+        {errors[otherFieldId] ? <p className="error-text">{errors[otherFieldId]}</p> : null}
       </div>
     );
   }
@@ -646,9 +773,11 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
         </div>
 
         <div className="scale-head" aria-hidden="true">
-          <span>&nbsp;</span>
+          <span className="scale-head-spacer">&nbsp;</span>
           {field.scale.map((option) => (
-            <span key={option.value}>{option.value}</span>
+            <span key={option.value} className="scale-head-value">
+              {option.value}
+            </span>
           ))}
         </div>
 
@@ -683,6 +812,110 @@ function FieldRenderer({ field, step, language, answers, errors, survey, onField
   }
 
   return null;
+}
+
+function SelectField({ field, language, answers, survey, stepTitle, onFieldChange, onAutoAdvance }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef(null);
+  const selectedValue = answers[field.id] || "";
+  const selectedOption = field.options.find((option) => option.value === selectedValue);
+  const filteredOptions = field.options.filter((option) =>
+    getText(option.label, language).toLowerCase().includes(query.trim().toLowerCase())
+  );
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const onPointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    const onEscape = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={rootRef} className={`select-field${isOpen ? " is-open" : ""}`}>
+      <button
+        type="button"
+        className="select-trigger"
+        name={field.id}
+        data-select-trigger="true"
+        aria-label={stepTitle}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className={`select-trigger-copy${selectedOption ? " has-value" : ""}`}>
+          {selectedOption ? getText(selectedOption.label, language) : getText(survey.ui.selectPlaceholder, language)}
+        </span>
+        <span className={`select-trigger-chevron${isOpen ? " is-open" : ""}`} aria-hidden="true">
+          &gt;
+        </span>
+      </button>
+
+      {isOpen ? (
+        <div className="select-panel">
+          <div className="select-search-row">
+            <input
+              type="text"
+              className="select-search-input"
+              value={query}
+              placeholder={getText(survey.ui.selectPlaceholder, language)}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <span className="select-search-icon" aria-hidden="true">
+              ⌕
+            </span>
+          </div>
+
+          <div className="select-options" role="listbox" aria-label={stepTitle}>
+            {filteredOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`select-option-card${selectedValue === option.value ? " is-selected" : ""}`}
+                onClick={() => {
+                  onFieldChange(field.id, option.value);
+
+                  const nestedOtherFieldId = getOtherFieldId(field);
+
+                  if (nestedOtherFieldId && option.value !== "other") {
+                    onFieldChange(nestedOtherFieldId, "");
+                  }
+
+                  setIsOpen(false);
+                  setQuery("");
+                  onAutoAdvance(option.value);
+                }}
+              >
+                {getText(option.label, language)}
+              </button>
+            ))}
+
+            {filteredOptions.length === 0 ? (
+              <div className="select-empty-state">{getText(survey.ui.noMatchingOptions, language)}</div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function getInitialState(survey, draftKey, submittedKey) {
@@ -755,12 +988,18 @@ function validateStep(step, answers, survey, language) {
     if (field.required && !String(answers[field.id] || "").trim()) {
       errors[field.id] = getText(survey.ui.requiredError, language);
     }
+
+    const otherFieldId = getOtherFieldId(field);
+
+    if (otherFieldId && answers[field.id] === "other" && !String(answers[otherFieldId] || "").trim()) {
+      errors[otherFieldId] = getText(survey.ui.specifyOtherError, language);
+    }
   });
 
   return errors;
 }
 
-function buildView({ survey, flowItems, displayItemId, language, answers, errors, submitting, submittedRecord, justSubmitted }) {
+function buildView({ survey, flowItems, displayItemId, language, submittedRecord, justSubmitted }) {
   if (submittedRecord) {
     return {
       type: "success",
@@ -800,7 +1039,6 @@ function buildView({ survey, flowItems, displayItemId, language, answers, errors
   return {
     type: "step",
     step: currentItem.step,
-    motion: "forward",
     questionNumber: currentItem.questionNumber,
     title: buildQuestionTitle(currentItem.step, survey, language),
     description: getQuestionDescription(currentItem.step, survey, language),
@@ -815,7 +1053,10 @@ function buildView({ survey, flowItems, displayItemId, language, answers, errors
 
 function getQuestionDescription(step, survey, language) {
   if (step.id === "consent") {
-    return getText(survey.meta.description, language);
+    return joinBlocks([
+      getText(survey.meta.description, language),
+      getText(step.description || "", language)
+    ]);
   }
 
   const description = getText(step.description || "", language);
@@ -851,7 +1092,20 @@ function getNextQuestionNumber(flowItems, currentItemId) {
 }
 
 function getFieldIds(step) {
-  return step.fields.flatMap((field) => (field.type === "scaleGroup" ? field.items.map((item) => item.id) : [field.id]));
+  return step.fields.flatMap((field) => {
+    if (field.type === "scaleGroup") {
+      return field.items.map((item) => item.id);
+    }
+
+    const ids = [field.id];
+    const otherFieldId = getOtherFieldId(field);
+
+    if (otherFieldId) {
+      ids.push(otherFieldId);
+    }
+
+    return ids;
+  });
 }
 
 function createSubmissionPayload(survey, visibleSteps, answers, language, submissionId) {
@@ -922,6 +1176,37 @@ function isGoogleAppsScriptEndpoint(endpointUrl) {
   }
 }
 
+function getOtherFieldId(field) {
+  return hasOtherOption(field) ? `${field.id}_other` : "";
+}
+
+function hasOtherOption(field) {
+  return Array.isArray(field.options) && field.options.some((option) => option.value === "other");
+}
+
+function shouldAutoAdvanceField(step, field, nextValue) {
+  if (!step || step.fields.length !== 1 || !nextValue) {
+    return false;
+  }
+
+  if (field.type === "consent") {
+    return nextValue === "yes";
+  }
+
+  if (field.type !== "radio" && field.type !== "select") {
+    return false;
+  }
+
+  return !(hasOtherOption(field) && nextValue === "other");
+}
+
+function clearAutoAdvanceTimeout(timeoutRef) {
+  if (timeoutRef.current) {
+    window.clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
+  }
+}
+
 function normalizeSavedItemId(value) {
   if (!value) {
     return null;
@@ -966,4 +1251,8 @@ function getText(value, language) {
 
 function formatStepCode(stepId) {
   return stepId.replaceAll("_", ".");
+}
+
+function joinBlocks(parts) {
+  return parts.filter(Boolean).join(" ");
 }

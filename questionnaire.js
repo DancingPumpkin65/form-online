@@ -89,6 +89,9 @@
       requiredGroupError: t("Please complete all required items in this section before continuing.", "Veuillez compléter tous les éléments obligatoires de cette section avant de continuer."),
       textareaHint: t("Optional response", "Réponse facultative"),
       selectPlaceholder: t("Type or select an option", "Saisissez ou sélectionnez une option"),
+      noMatchingOptions: t("No matching options", "Aucune option correspondante"),
+      specifyOtherPlaceholder: t("Please specify", "Veuillez préciser"),
+      specifyOtherError: t("Please specify your answer before continuing.", "Veuillez préciser votre réponse avant de continuer."),
       submissionError: t("The response could not be submitted right now. Please try again in a moment.", "La réponse n'a pas pu être envoyée pour le moment. Veuillez réessayer dans un instant."),
       endpointMissing: t("Add your Google Apps Script web app URL in questionnaire.js before collecting live responses.", "Ajoutez l'URL de votre application Web Google Apps Script dans questionnaire.js avant de collecter de vraies réponses."),
       sectionLabel: t("Section", "Section"),
@@ -114,24 +117,24 @@
         id: "B",
         title: t("Your English language needs", "Vos besoins en langue anglaise"),
         description: t(
-          "Please rate how important each activity is to you, both in your current studies and in your future career.",
-          "Veuillez évaluer l'importance de chaque activité pour vous, à la fois dans vos études actuelles et dans votre future carrière."
+          "The following questions ask about your English language needs. Please rate how important each activity is to you — both in your current studies and in your future career.",
+          "Les questions suivantes portent sur vos besoins en anglais. Veuillez évaluer l'importance de chaque activité pour vous, à la fois dans vos études actuelles et dans votre future carrière."
         )
       },
       C: {
         id: "C",
         title: t("Your current English proficiency", "Votre niveau actuel en anglais"),
         description: t(
-          "Please assess your current English ability honestly. There are no right or wrong answers.",
-          "Veuillez évaluer honnêtement votre niveau actuel en anglais. Il n'y a pas de bonne ou de mauvaise réponse."
+          "This section asks about your current English ability. Please rate yourself honestly — there are no right or wrong answers.",
+          "Cette section porte sur votre niveau actuel en anglais. Veuillez vous évaluer honnêtement — il n'y a pas de bonne ou de mauvaise réponse."
         )
       },
       D: {
         id: "D",
         title: t("What you want to focus on", "Ce sur quoi vous souhaitez vous concentrer"),
         description: t(
-          "Tell us what you personally want to improve, even if it differs from academic or professional priorities.",
-          "Indiquez ce que vous souhaitez personnellement améliorer, même si cela diffère des priorités académiques ou professionnelles."
+          "Now we'd like to know what you personally want to focus on improving.",
+          "Nous aimerions maintenant savoir sur quoi vous souhaitez personnellement vous concentrer pour vous améliorer."
         )
       },
       E: {
@@ -146,8 +149,8 @@
         id: "F",
         title: t("Your English preparation at ENCG", "Votre préparation en anglais à l'ENCG"),
         description: t(
-          "Please evaluate how well the English courses at ENCG have prepared you in specific skill areas.",
-          "Veuillez évaluer dans quelle mesure les cours d'anglais à l'ENCG vous ont préparé dans des domaines précis."
+          "This section asks you to evaluate how well the English courses at ENCG have prepared you in specific skill areas.",
+          "Cette section vous demande d'évaluer dans quelle mesure les cours d'anglais à l'ENCG vous ont préparé dans des domaines précis."
         )
       },
       G: {
@@ -278,51 +281,56 @@
         id: "B1",
         sectionId: "B",
         title: t("In your current studies", "Dans vos études actuelles"),
-        description: t("Rate how important each activity is to you in your current studies.", "Évaluez l'importance de chaque activité pour vous dans vos études actuelles."),
+        description: t("Please use the following scale for all questions in this section:", "Veuillez utiliser l'échelle suivante pour toutes les questions de cette section :"),
         fields: [{ id: "B1_group", type: "scaleGroup", required: true, scale: SCALE_IMPORTANCE, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "B1_1", prompt: t("Understanding lectures and videos in English", "Comprendre des cours et des vidéos en anglais") }, { id: "B1_2", prompt: t("Reading textbooks, case studies, and articles in English (including online sources)", "Lire des manuels, des études de cas et des articles en anglais, y compris des sources en ligne") }, { id: "B1_3", prompt: t("Participating in class discussions and group work in English", "Participer à des discussions de classe et à des travaux de groupe en anglais") }, { id: "B1_4", prompt: t("Giving academic presentations in English", "Faire des présentations académiques en anglais") }, { id: "B1_5", prompt: t("Writing academic reports and assignments in English", "Rédiger des rapports et des travaux académiques en anglais") }] }]
       },
       {
         id: "B2",
         sectionId: "B",
         title: t("In your future career", "Dans votre future carrière"),
-        description: t("Rate how important each activity is to you in your future career.", "Évaluez l'importance de chaque activité pour vous dans votre future carrière."),
+        description: t("Please use the following scale for all questions in this section:", "Veuillez utiliser l'échelle suivante pour toutes les questions de cette section :"),
         fields: [{ id: "B2_group", type: "scaleGroup", required: true, scale: SCALE_IMPORTANCE, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "B2_1", prompt: t("Understanding spoken English in professional settings (meetings, phone calls, video conferences)", "Comprendre l'anglais oral dans des contextes professionnels (réunions, appels téléphoniques, visioconférences)") }, { id: "B2_2", prompt: t("Reading professional documents in English (reports, contracts, emails, technical documents)", "Lire des documents professionnels en anglais (rapports, contrats, courriels, documents techniques)") }, { id: "B2_3", prompt: t("Speaking English in professional interactions (with colleagues, clients, or partners)", "Parler anglais lors d'interactions professionnelles (avec des collègues, des clients ou des partenaires)") }, { id: "B2_4", prompt: t("Giving professional presentations in English (to clients, teams, or management)", "Faire des présentations professionnelles en anglais (à des clients, des équipes ou à la direction)") }, { id: "B2_5", prompt: t("Writing professional emails and business correspondence in English", "Rédiger des courriels professionnels et des correspondances d'affaires en anglais") }, { id: "B2_6", prompt: t("Writing long professional documents in English (reports, proposals, formal documents)", "Rédiger de longs documents professionnels en anglais (rapports, propositions, documents formels)") }] }]
       },
       {
         id: "C1",
         sectionId: "C",
         title: t("General English ability", "Compétence générale en anglais"),
-        description: t("Please rate how well you can currently perform each skill.", "Veuillez évaluer dans quelle mesure vous pouvez actuellement réaliser chaque compétence."),
+        description: t("Please use the following scale. How well can you...", "Veuillez utiliser l'échelle suivante. Dans quelle mesure pouvez-vous..."),
         fields: [{ id: "C1_group", type: "scaleGroup", required: true, scale: SCALE_ABILITY, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "C1_1", prompt: t("Listening", "Compréhension orale"), detail: t("Understand spoken English (conversations, lectures, media)", "Comprendre l'anglais parlé (conversations, cours, médias)") }, { id: "C1_2", prompt: t("Reading", "Lecture"), detail: t("Read texts in English (articles, books, documents)", "Lire des textes en anglais (articles, livres, documents)") }, { id: "C1_3", prompt: t("Spoken interaction", "Interaction orale"), detail: t("Take part in conversations in English", "Participer à des conversations en anglais") }, { id: "C1_4", prompt: t("Spoken production", "Production orale"), detail: t("Speak English in extended discourse (presentations, explanations)", "Parler anglais de manière développée (présentations, explications)") }, { id: "C1_5", prompt: t("Writing", "Écriture"), detail: t("Write texts in English (emails, reports, essays)", "Rédiger des textes en anglais (courriels, rapports, essais)") }] }]
       },
       {
         id: "C2",
         sectionId: "C",
         title: t("Confidence in professional Business English tasks", "Confiance dans les tâches professionnelles en anglais des affaires"),
+        description: t("Please use the following scale. How confident are you in your ability to...", "Veuillez utiliser l'échelle suivante. Dans quelle mesure êtes-vous confiant(e) dans votre capacité à..."),
         fields: [{ id: "C2_group", type: "scaleGroup", required: true, scale: SCALE_CONFIDENCE, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "C2_1", prompt: t("Understanding spoken English in professional settings (meetings, phone calls, video conferences)", "Comprendre l'anglais oral dans des contextes professionnels (réunions, appels téléphoniques, visioconférences)") }, { id: "C2_2", prompt: t("Reading professional documents in English (reports, contracts, emails, technical documents)", "Lire des documents professionnels en anglais (rapports, contrats, courriels, documents techniques)") }, { id: "C2_3", prompt: t("Speaking English in professional interactions (with colleagues, clients, or partners)", "Parler anglais lors d'interactions professionnelles (avec des collègues, des clients ou des partenaires)") }, { id: "C2_4", prompt: t("Giving professional presentations in English (to clients, teams, or management)", "Faire des présentations professionnelles en anglais (à des clients, des équipes ou à la direction)") }, { id: "C2_5", prompt: t("Writing professional emails and business correspondence in English", "Rédiger des courriels professionnels et des correspondances d'affaires en anglais") }, { id: "C2_6", prompt: t("Writing long professional documents in English (reports, proposals, formal documents)", "Rédiger de longs documents professionnels en anglais (rapports, propositions, documents formels)") }] }]
       },
       {
         id: "D",
         sectionId: "D",
         title: t("What do you personally want to improve?", "Que souhaitez-vous personnellement améliorer ?"),
+        description: t("Please use the following scale. How much would you like to focus on...", "Veuillez utiliser l'échelle suivante. Dans quelle mesure souhaitez-vous vous concentrer sur..."),
         fields: [{ id: "D_group", type: "scaleGroup", required: true, scale: SCALE_FOCUS, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "D1", prompt: t("Improving my listening skills in English", "Améliorer mes compétences de compréhension orale en anglais") }, { id: "D2", prompt: t("Improving my reading skills in English", "Améliorer mes compétences de lecture en anglais") }, { id: "D3", prompt: t("Improving my speaking skills in English", "Améliorer mes compétences d'expression orale en anglais") }, { id: "D4", prompt: t("Improving my writing skills in English", "Améliorer mes compétences d'expression écrite en anglais") }, { id: "D5", prompt: t("Improving my Business English vocabulary and terminology", "Améliorer mon vocabulaire et ma terminologie en anglais des affaires") }, { id: "D6", prompt: t("Improving my grammar and accuracy in English", "Améliorer ma grammaire et ma précision en anglais") }] }]
       },
       {
         id: "E1",
         sectionId: "E",
         title: t("Activities you find useful", "Activités que vous trouvez utiles"),
+        description: t("Please use the following scale. How useful do you find each of the following activities for learning English?", "Veuillez utiliser l'échelle suivante. Dans quelle mesure trouvez-vous chacune des activités suivantes utile pour apprendre l'anglais ?"),
         fields: [{ id: "E1_group", type: "scaleGroup", required: true, scale: SCALE_USEFULNESS, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "E1_1", prompt: t("Role-plays and simulations of real-world business situations", "Jeux de rôle et simulations de situations réelles du monde des affaires") }, { id: "E1_2", prompt: t("Group discussions and collaborative activities in English", "Discussions de groupe et activités collaboratives en anglais") }, { id: "E1_3", prompt: t("Case studies, business analyses, and project-based work", "Études de cas, analyses commerciales et travaux basés sur des projets") }, { id: "E1_4", prompt: t("Grammar and vocabulary exercises", "Exercices de grammaire et de vocabulaire") }] }]
       },
       {
         id: "E2",
         sectionId: "E",
         title: t("Your current English classes", "Vos cours d'anglais actuels"),
+        description: t("Please indicate how much you agree or disagree with each statement.", "Veuillez indiquer dans quelle mesure vous êtes d'accord ou en désaccord avec chaque affirmation."),
         fields: [{ id: "E2_group", type: "scaleGroup", required: true, scale: SCALE_AGREEMENT, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "E2_1", prompt: t("My English classes give me enough opportunities to practice speaking", "Mes cours d'anglais me donnent suffisamment d'occasions de pratiquer l'expression orale") }, { id: "E2_2", prompt: t("The materials and topics used in class are relevant to my future career", "Les supports et les thèmes utilisés en classe sont pertinents pour ma future carrière") }, { id: "E2_3", prompt: t("My English classes focus more on grammar than on real communication", "Mes cours d'anglais se concentrent davantage sur la grammaire que sur la communication réelle") }, { id: "E2_4", prompt: t("The teaching methods used in my English classes match how I prefer to learn", "Les méthodes d'enseignement utilisées dans mes cours d'anglais correspondent à ma manière préférée d'apprendre") }] }]
       },
       {
         id: "F",
         sectionId: "F",
         title: t("How well have ENCG English courses prepared you?", "Dans quelle mesure les cours d'anglais de l'ENCG vous ont-ils préparé(e) ?"),
+        description: t("Please use the following scale. How well have your English courses at ENCG prepared you in...", "Veuillez utiliser l'échelle suivante. Dans quelle mesure vos cours d'anglais à l'ENCG vous ont-ils préparé(e) en..."),
         fields: [{ id: "F_group", type: "scaleGroup", required: true, scale: SCALE_PREPARATION, legendTitle: t("Shared answer scale", "Échelle de réponse commune"), items: [{ id: "F1", prompt: t("Listening", "Compréhension orale"), detail: t("Listening and understanding spoken English in academic and professional contexts", "Écouter et comprendre l'anglais parlé dans des contextes académiques et professionnels") }, { id: "F2", prompt: t("Reading", "Lecture"), detail: t("Reading academic and professional texts in English", "Lire des textes académiques et professionnels en anglais") }, { id: "F3", prompt: t("Speaking", "Expression orale"), detail: t("Speaking English (presentations, discussions, professional interactions)", "Parler anglais (présentations, discussions, interactions professionnelles)") }, { id: "F4", prompt: t("Writing", "Écriture"), detail: t("Writing in English (emails, reports, academic and professional documents)", "Écrire en anglais (courriels, rapports, documents académiques et professionnels)") }, { id: "F5", prompt: t("Vocabulary and terminology", "Vocabulaire et terminologie"), detail: t("Mastering Business English vocabulary and terminology specific to your specialization", "Maîtriser le vocabulaire et la terminologie de l'anglais des affaires propres à votre spécialisation") }] }]
       },
       { id: "G1", sectionId: "G", title: t("What is one thing you wish your English courses at ENCG focused more on?", "Quelle est la principale chose sur laquelle vous souhaiteriez que vos cours d'anglais à l'ENCG se concentrent davantage ?"), fields: [{ id: "G1", type: "textarea", required: false, maxLength: 600 }] },
