@@ -66,7 +66,7 @@
   const definition = {
     config: {
       defaultLanguage: "en",
-      endpointUrl: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
+      endpointUrl: "https://script.google.com/macros/s/AKfycbwrZqj_VYGwnpR0vmBymFB939JvHs6ICGvp81BdxvLW5ZlMMaqiLQzoUyXyZfXwV5qCAg/exec",
       draftStorageKey: "encg-esp-survey-draft-v1",
       submittedStorageKey: "encg-esp-survey-submitted-v1",
       version: "2026-04-29"
