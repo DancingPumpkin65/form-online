@@ -118,7 +118,7 @@ export default function App() {
       }
 
       if (currentItem.id === flowItems[flowItems.length - 1]?.id) {
-        await handleSubmit();
+        await handleSubmit(undefined, predictedAnswers);
         return;
       }
 
@@ -310,7 +310,7 @@ export default function App() {
     }, AUTO_ADVANCE_DELAY);
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event, answersSnapshot = answers) {
     event?.preventDefault();
 
     if (transition || submitting || submittedRecord) {
@@ -320,11 +320,11 @@ export default function App() {
     clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
 
     const allErrors = {};
-    visibleSteps.forEach((step) => Object.assign(allErrors, validateStep(step, answers, survey, language)));
+    visibleSteps.forEach((step) => Object.assign(allErrors, validateStep(step, answersSnapshot, survey, language)));
     setErrors(allErrors);
 
     if (Object.keys(allErrors).length > 0) {
-      const firstBadItemId = findFirstIncompleteItemId(flowItems, answers, survey, language);
+      const firstBadItemId = findFirstIncompleteItemId(flowItems, answersSnapshot, survey, language);
 
       if (firstBadItemId && firstBadItemId !== displayItemId) {
         await transitionTo(firstBadItemId, "forward");
@@ -347,7 +347,10 @@ export default function App() {
     setAlertMessage("");
 
     try {
-      const result = await sendSubmission(endpointUrl, createSubmissionPayload(survey, visibleSteps, answers, language, submissionId));
+      const result = await sendSubmission(
+        endpointUrl,
+        createSubmissionPayload(survey, visibleSteps, answersSnapshot, language, submissionId)
+      );
 
       if (!result.success) {
         throw new Error(result.message || getText(survey.ui.submissionError, language));
