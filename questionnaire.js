@@ -95,12 +95,10 @@
       submissionError: t("The response could not be submitted right now. Please try again in a moment.", "La réponse n'a pas pu être envoyée pour le moment. Veuillez réessayer dans un instant."),
       endpointMissing: t("Add your Google Apps Script web app URL in questionnaire.js before collecting live responses.", "Ajoutez l'URL de votre application Web Google Apps Script dans questionnaire.js avant de collecter de vraies réponses."),
       sectionLabel: t("Section", "Section"),
-      alreadySubmittedTitle: t("This device has already submitted this questionnaire.", "Cet appareil a déjà soumis ce questionnaire."),
+      alreadySubmittedTitle: t("This device has already submitted.", "Cet appareil a déjà soumis ce questionnaire."),
       alreadySubmittedCopy: t("Duplicate submissions are blocked after a successful send. To test again locally, use the reset instructions in the README.", "Les soumissions en double sont bloquées après un envoi réussi. Pour tester à nouveau en local, utilisez les instructions de réinitialisation dans le README."),
       successTitle: t("Thank you. Your response has been recorded.", "Merci. Votre réponse a bien été enregistrée."),
-      successCopy: t("Your anonymous answers will support the analysis of Business English needs at ENCG.", "Vos réponses anonymes contribueront à l'analyse des besoins en anglais des affaires à l'ENCG."),
-      successSupport: t("If you need to update your deployment later, replace the Apps Script URL in questionnaire.js and redeploy GitHub Pages if needed.", "Si vous devez mettre à jour le déploiement plus tard, remplacez l'URL Apps Script dans questionnaire.js puis redéployez GitHub Pages si nécessaire."),
-      returnTop: t("Back to top", "Retour en haut")
+      successCopy: t("Your anonymous answers will support the analysis of Business English needs at ENCG.", "Vos réponses anonymes contribueront à l'analyse des besoins en anglais des affaires à l'ENCG.")
     },
     meta: {
       title: t("A Needs Analysis of Business English ESP at ENCG", "Une analyse des besoins en anglais des affaires à l'ENCG"),

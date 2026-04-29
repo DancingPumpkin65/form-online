@@ -235,7 +235,7 @@ button {
 .success-copy,
 .section-intro-copy {
   max-width: 980px;
-  margin: 0 0 0 34px;
+  margin: 0;
   color: var(--ink-soft);
   font-size: var(--text-sm);
   line-height: 1.55;
@@ -904,14 +904,22 @@ button {
 
 .success-state {
   display: grid;
-  place-items: start;
+  place-items: center;
   min-height: 60vh;
   padding-top: 70px;
   will-change: transform, opacity;
 }
 
 .success-panel {
-  max-width: 720px;
+  width: min(100%, 920px);
+  max-width: 920px;
+}
+
+.success-headline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
 }
 
 .success-badge {
@@ -948,7 +956,7 @@ button {
 }
 
 .support-note {
-  max-width: 720px;
+  max-width: 920px;
   color: var(--ink-soft);
   font-size: var(--text-sm);
   line-height: 1.55;

@@ -184,21 +184,22 @@ export default function App() {
       })
     : null;
 
-  async function moveFlowItem(direction) {
+  async function moveFlowItem(direction, answersSnapshot = answers) {
     if (transition) {
       return;
     }
 
     clearAutoAdvanceTimeout(autoAdvanceTimeoutRef);
 
-    const currentIndex = flowItems.findIndex((item) => item.id === displayItemId);
+    const targetFlowItems = buildFlowItems(getVisibleSteps(survey.steps, answersSnapshot));
+    const currentIndex = targetFlowItems.findIndex((item) => item.id === displayItemId);
     const nextIndex = currentIndex + direction;
 
-    if (nextIndex < 0 || nextIndex >= flowItems.length) {
+    if (nextIndex < 0 || nextIndex >= targetFlowItems.length) {
       return;
     }
 
-    const nextItemId = flowItems[nextIndex].id;
+    const nextItemId = targetFlowItems[nextIndex].id;
     setErrors({});
     setAlertMessage("");
     await transitionTo(nextItemId, direction > 0 ? "forward" : "backward");
@@ -305,7 +306,7 @@ export default function App() {
         return;
       }
 
-      await moveFlowItem(1);
+      await moveFlowItem(1, predictedAnswers);
     }, AUTO_ADVANCE_DELAY);
   }
 
@@ -521,15 +522,12 @@ function renderView(view, props) {
     return (
       <section className="success-state">
         <div className="success-panel">
-          <div className="success-badge" aria-hidden="true" />
-          <h2 className="success-title">{view.title}</h2>
+          <div className="success-headline">
+            <div className="success-badge" aria-hidden="true" />
+            <h2 className="success-title">{view.title}</h2>
+          </div>
           <p className="success-copy">{view.copy}</p>
           <p className="support-note">{view.support}</p>
-          <div className="success-actions">
-            <button type="button" className="button button-secondary" onClick={props.onRestart}>
-              {getText(props.survey.ui.returnTop, props.language)}
-            </button>
-          </div>
         </div>
       </section>
     );
