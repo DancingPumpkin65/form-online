@@ -512,6 +512,15 @@ export default function App() {
           ) : null}
         </section>
       </main>
+
+      <a
+        className="credit-note"
+        href="https://github.com/DancingPumpkin65"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Built by GitHub user DancingPumpkin65
+      </a>
     </div>
   );
 }

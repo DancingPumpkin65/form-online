@@ -58,6 +58,7 @@ button {
 }
 
 .page-shell {
+  position: relative;
   width: min(100%, var(--shell-width));
   margin: 0 auto;
   padding: 0 28px 56px;
@@ -911,6 +912,22 @@ button {
   gap: 2px;
 }
 
+.credit-note {
+  position: fixed;
+  left: 28px;
+  bottom: 16px;
+  z-index: 7;
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.credit-note:hover,
+.credit-note:focus-visible {
+  color: var(--accent);
+}
+
 .floating-nav-button {
   display: inline-flex;
   align-items: center;
@@ -1220,6 +1237,11 @@ button {
   .floating-nav {
     right: 18px;
     bottom: 18px;
+  }
+
+  .credit-note {
+    left: 20px;
+    bottom: 14px;
   }
 }
 
