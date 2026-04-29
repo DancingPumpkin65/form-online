@@ -4,7 +4,7 @@
   --text-sm: 1rem;
   --text-md: 1rem;
   --text-lg: 1.1rem;
-  --text-xl: 1.8rem;
+  --text-xl: 1.6rem;
   --bg: #ffffff;
   --ink: #111111;
   --ink-soft: #4d4d4d;
@@ -32,7 +32,7 @@
 }
 
 html {
-  font-size: 15px;
+  font-size: 100%;
   overflow-y: scroll;
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
@@ -186,7 +186,7 @@ button {
 .step-main,
 .success-panel,
 .section-intro-panel {
-  gap: 30px;
+  gap: 20px;
 }
 
 .step-header {
@@ -220,7 +220,7 @@ button {
 .success-title,
 .section-intro-title {
   margin: 0;
-  font-size: clamp(var(--text-xl), 2.8vw, 3.1rem);
+  font-size: clamp(var(--text-xl), calc(var(--text-xl) + 1vw), calc(var(--text-xl) * 1.72));
   font-weight: 500;
   line-height: 1.16;
   letter-spacing: -0.045em;
@@ -242,13 +242,12 @@ button {
 }
 
 .field-stack {
-  gap: 14px;
   margin-left: 34px;
 }
 
 .field-stack-description {
   max-width: 940px;
-  margin: 0 0 6px;
+  margin: 0;
   color: var(--ink-soft);
   font-size: var(--text-sm);
   line-height: 1.55;
@@ -840,7 +839,7 @@ button {
   z-index: 0;
   margin: 0;
   color: color-mix(in srgb, var(--accent) 14%, white);
-  font-size: clamp(5rem, 12vw, 8rem);
+  font-size: clamp(calc(var(--text-xl) * 2.8), 12vw, calc(var(--text-xl) * 4.45));
   line-height: 0.7;
 }
 
@@ -877,7 +876,7 @@ button {
   align-items: center;
   justify-content: center;
   width: 40px;
-  height: 40px;
+  height: 30px;
   border: 0;
   border-radius: 9px;
   background: var(--accent);
@@ -1122,7 +1121,7 @@ button {
   .question-title,
   .success-title,
   .section-intro-title {
-    font-size: clamp(calc(var(--text-xl) - 0.3rem), 7vw, 2.2rem);
+    font-size: clamp(calc(var(--text-xl) - 0.3rem), 7vw, calc(var(--text-xl) + 0.4rem));
   }
 
   .step-description,
